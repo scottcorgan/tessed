@@ -38,12 +38,15 @@ var namespace test('namespace');
 namespace.beforeEach(function (t, context) {
   
   // attach data for the tests in the namespace to this "context" object  
+  context.myData = "something";
   t.end();
 });
 
-namespace.test('my test', function (t) {
+namespace.test('my test', function (t, context) {
   
   // This runs after the "beforeEach()"
+  
+  t.equal(context.myData, 'something', 'context data is passed within namespace');
   t.end()
 });
 
