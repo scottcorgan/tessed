@@ -1,0 +1,43 @@
+{
+  "name": "runner",
+  "version": "1.0.0",
+  "description": "A more robust tap-producing, tape compatible, test harness for node and browsers. Namespacing, context passing, beforeEach, afterEach, etc ...",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scottcorgan/runner.git"
+  },
+  "scripts": {
+    "test": "npm run test-all && npm run test-only",
+    "test-all": "node test/index.js | tap-spec",
+    "test-only": "node test/only.js | tap-spec"
+  },
+  "keywords": [
+    "tape",
+    "tap",
+    "test",
+    "before",
+    "after",
+    "beforeEach",
+    "afterEach",
+    "harness"
+  ],
+  "author": "Scott Corgan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scottcorgan/runner/issues"
+  },
+  "homepage": "https://github.com/scottcorgan/runner",
+  "dependencies": {
+    "async": "^0.9.0",
+    "glob": "^4.2.1",
+    "tape": "3.x.x"
+  },
+  "devDependencies": {
+    "clear-require": "^1.0.1",
+    "tap-spec": "^2.1.0"
+  },
+  "bin": {
+    "runner": "./bin/runner"
+  }
+}
