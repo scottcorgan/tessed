@@ -8,7 +8,7 @@ Adds the following to [tape](https://github.com/substack/tape) without changing 
 
 Instead of having awkward `describe()` and `it()` as it is in a typical BDD test runner, this runner lets you use obvious namespacing to build chains of related tests. This not only makes it easier to read the tests, but easier to read the output when used with a module like [tap-spec](https://github.com/scottcorgan/tap-spec).
 
-```
+```js
 var test = require('runner');
 
 var namesapce = test('namespace');
@@ -26,11 +26,37 @@ nestedNamespace.test('another test', function (t) {
 });
 ```
 
-#### beforeEach()
+#### beforeEach(), afterEach()
 
-#### afterEach()
+Within a namespace, Runner allows you to define set up and teardown functions to run before and after each test in that namespace. Each `beforeEach()` and `afterEach()` will also be called for each child/nested test (similar to [Mocha's nested suites](http://visionmedia.github.io/mocha/))
 
-Each `beforeEach()` and `afterEach()` will also be called for each child/nested test (similar to [Mocha's nested suites](http://visionmedia.github.io/mocha/))
+```js
+var test = require('runner');
+
+var namespace test('namespace');
+
+namespace.beforeEach(function (t, context) {
+  
+  // attach data for the tests in the namespace to this "context" object  
+  t.end();
+});
+
+namespace.test('my test', function (t) {
+  
+  // This runs after the "beforeEach()"
+  t.end()
+});
+
+var nestedNamespace = namespace.test('nested')
+
+nestedNamespace.test('nested test', function (t, context) {
+
+  // The beforeEach() will be called before this test as well because
+  // It is in the same namespace
+  
+  t.end();
+});
+```
 
 ## Install
 
