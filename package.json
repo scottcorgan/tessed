@@ -31,6 +31,8 @@
   "dependencies": {
     "async": "^0.9.0",
     "glob": "^4.2.1",
+    "lodash.assign": "^2.4.1",
+    "lodash.clonedeep": "^2.4.1",
     "tape": "3.x.x"
   },
   "devDependencies": {
