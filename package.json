@@ -1,11 +1,11 @@
 {
-  "name": "runner",
+  "name": "tessed",
   "version": "1.0.0",
   "description": "A more robust tap-producing, tape compatible, test harness for node and browsers. Namespacing, context passing, beforeEach, afterEach, etc ...",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/scottcorgan/runner.git"
+    "url": "https://github.com/scottcorgan/tessed.git"
   },
   "scripts": {
     "test": "npm run test-all && npm run test-only",
@@ -25,9 +25,9 @@
   "author": "Scott Corgan",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/scottcorgan/runner/issues"
+    "url": "https://github.com/scottcorgan/tessed/issues"
   },
-  "homepage": "https://github.com/scottcorgan/runner",
+  "homepage": "https://github.com/scottcorgan/tessed",
   "dependencies": {
     "async": "^0.9.0",
     "glob": "^4.2.1",
@@ -38,6 +38,6 @@
     "tap-spec": "^2.1.0"
   },
   "bin": {
-    "runner": "./bin/runner"
+    "tessed": "./bin/tessed"
   }
 }

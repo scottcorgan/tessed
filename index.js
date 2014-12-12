@@ -11,7 +11,7 @@ var asArray = require('as-array');
 // and will be dealt with if encountered
 var only = false;
 
-var runner = module.exports = function (description, fn, _internals) {
+var tessed = module.exports = function (description, fn, _internals) {
   
   // After each functions should be ran in a last in/first out series
   var shouldPrependAfterEach = false;
@@ -121,7 +121,7 @@ var runner = module.exports = function (description, fn, _internals) {
     var nextInternals = extend(parentInternals, childOptions);
     
     // Return a runner with a namespace description prepended
-    return runner(description + ' - ' + testDescription, fn, nextInternals);
+    return tessed(description + ' - ' + testDescription, fn, nextInternals);
   }
   
   test.only = function (testDescription, fn) {
@@ -172,16 +172,16 @@ var runner = module.exports = function (description, fn, _internals) {
   return Object.freeze(methods);
 };
 
-runner.only = function (description, fn, _internals) {
+tessed.only = function (description, fn, _internals) {
   
-  return runner(description, fn, {
+  return tessed(description, fn, {
     only: true
   });
 };
 
-runner.skip = function (description, fn, _internals) {
+tessed.skip = function (description, fn, _internals) {
   
-  return runner(description, fn, {
+  return tessed(description, fn, {
     skip: true
   });
 };
