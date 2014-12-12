@@ -121,7 +121,7 @@ var tessed = module.exports = function (description, fn, _internals) {
     var nextInternals = extend(parentInternals, childOptions);
     
     // Return a runner with a namespace description prepended
-    return tessed(description + ' - ' + testDescription, fn, nextInternals);
+    return tessed(description + ' -> ' + testDescription, fn, nextInternals);
   }
   
   test.only = function (testDescription, fn) {
