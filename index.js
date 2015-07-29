@@ -1,187 +1,102 @@
 var tape = require('tape');
-var async = require('async');
-var cloneDeep = require('lodash.clonedeep');
-var extend = require('lodash.assign');
-var asArray = require('as-array');
+var isPromise = require('is-promise');
+var merge = require('merge');
 
-// Putting the only here ensures this gets applied
-// throughout all tests. The only time this could get
-// messed up is if the require cache is cleared, then it might
-// run more tests than wanted. This is an extreme edge case
-// and will be dealt with if encountered
-var only = false;
+function namespace (name, setup) {
 
-var tessed = module.exports = function (description, fn, _internals) {
-  
-  // After each functions should be ran in a last in/first out series
-  var shouldPrependAfterEach = false;
-  if (_internals && _internals.afterEach) {
-    shouldPrependAfterEach = true;
-  }
-  
-  // Ensure we maintain internals
-  var internals = extend({
-    beforeEach: [],
-    afterEach: []
-  }, _internals);
-  
-  process.nextTick(run);
-  
-  function run () {
-    
-    // Only set up tests if there's a test callback
-    if (fn) {
-      
-      // Because of the nature of the only() method in tape (it can only have one),
-      // we ensure that any test that is set to only or has a parent set to only,
-      // is set up to run.
-      if (only && (internals.only || internals.parentOnly)) {
-        tape(description, testCallback);
-      }
-      
-      // Skip the module
-      else if(internals.skip) {
-        tape.skip(description, testCallback); 
-      }
-      
-      // Only set up a test if this no module is set with only()
-      else if (!only) {
-        tape(description, testCallback);
-      }
-    }
-    
-    // When the test is complete, make sure tape
-    // gets closed
-    function testCallback (tRoot) {
-              
-      var rootEnd = tRoot.end;
-      tRoot.end = function () {
-        
-       rootEnd.apply(rootEnd, arguments);
+  setup = setup || {};
+
+  var beforeEach = setup.beforeEach || [];
+  var afterEach = setup.afterEach || [];
+  var tapeFn = tape;
+
+  var tester = function (name2, fn) {
+
+    var testName = name ? name + ' -> ' + name2 : name2;
+
+    return tapeFn(testName, function (t) {
+
+      var end = t.end.bind(t);
+
+      // Call all beforeEach fns and set return as context
+      // to pass to test methods
+
+      var beforeEachReturns = beforeEach.map(function (be) {
+
+        return be();
+      });
+
+      t.context = merge.apply(null, beforeEachReturns);
+      t.end = function () {
+
+        afterEach.forEach(function (ae) {
+
+          ae({
+            context: t.context
+          })
+        });
+        end();
       };
-      
-      fn(tRoot, {});
-    }
-  }
-  
-  // Wrap the test with befores/afters and anything else
-  // the test wants
-  function test (testDescription, fn, options) {
-    
-    options = options || {};
-    
-    var _fn = fn;
-    
-    // Wrap tests in before/after (each)
-    if (fn && typeof fn === 'function') {
-      fn = function (t, context) {
-        
-        var end = t.end.bind(t);
-        
-        async.series({
-          beforeEach: function (done) {
-            
-            async.eachSeries(internals.beforeEach, function (before, beforeDone) {
-              
-              before({end: beforeDone}, context);
-            }, done);
-          },
-          test: function (done) {
-            
-            t.end = done;
-            // _fn(t, context);
-            _fn(t, context);
-          },
-          afterEach: function (done) {
-            
-            async.eachSeries(internals.afterEach, function (after, afterDone) {
-              
-              after({end: afterDone}, context);
-            }, done);
-          }
-        }, function () {
-          
-          end();
+
+      //
+      var ret = fn({
+        equal: t.equal,
+        deepEqual: t.deepEqual,
+        pass: t.pass,
+        fail: t.fail,
+        notDeepEqual: t.notDeepEqual,
+        notEqual: t.notEqual,
+        context: t.context
+      });
+
+      // Promise
+      if (isPromise(ret)) {
+        ret.then(function () {
+
+          return end();
         });
       }
-    }
-    
-    // Pass in internals so that we can have nested before/after (each) type
-    // functions to nested tests.
-    // Need to track if parent has an only() method called. If it is called, then
-    // we don't need to to set the kids as only()
-    var childOptions = cloneDeep(options);
-    var parentInternals = cloneDeep(internals);
-    
-    if (parentInternals.only) {
-      childOptions.only = false;
-      childOptions.parentOnly = true;
-    }
-    
-    var nextInternals = extend(parentInternals, childOptions);
-    
-    // Return a runner with a namespace description prepended
-    return tessed(description + ' ' + testDescription, fn, nextInternals);
+      // Thunk
+      else if (typeof ret === 'function') {
+        ret(end);
+      }
+      // Call end of synchronous tests automatically
+      else {
+        end();
+      }
+    });
   }
-  
-  test.only = function (testDescription, fn) {
-    
-    only = true;
-    
-    return test(testDescription, fn, {
-      only: true
+
+  tester.beforeEach = function (fn) {
+
+    return beforeEach.push(fn);
+  };
+  tester.afterEach = function (fn) {
+
+    return afterEach.push(fn);
+  };
+
+  tester.namespace = function (name2) {
+
+    return namespace(name + ' -> ' + name2, {
+      beforeEach: beforeEach,
+      afterEach: afterEach,
     });
   };
-  
-  test.skip = function (testDescription, fn) {
-    
-    return test(testDescription, fn, {
-      skip: true
-    });
-  };
-  
-  function beforeEach (fn) {
-    
-    // TODO: fail fast here if no "fn"
-    
-    if (fn) {
-      internals.beforeEach.push(fn);
-    }
-    
-    return methods;
-  }
-  
-  function afterEach (fn) {
-    
-    if (fn) {
-      // See the definition of shouldPrependAfterEach for why this is done
-      internals.afterEach[shouldPrependAfterEach ? 'unshift' : 'push'](fn);
-    }
-    
-    return methods;
-  }
-  
-  /////////////////
-  
-  var methods = {
-    beforeEach: beforeEach,
-    afterEach: afterEach,
-    test: test
-  };
-  
-  return Object.freeze(methods);
-};
 
-tessed.only = function (description, fn, _internals) {
-  
-  return tessed(description, fn, {
-    only: true
-  });
-};
+  tester.only = function () {
 
-tessed.skip = function (description, fn, _internals) {
-  
-  return tessed(description, fn, {
-    skip: true
-  });
+    tapeFn = tape.only;
+    tester.apply(null, arguments);
+    tapeFn = tape;
+  };
+
+  tester.skip = function () {};
+
+  return tester;
+}
+
+module.exports = {
+  namespace: namespace,
+  test: tape
 };
