@@ -1,6 +1,6 @@
 {
   "name": "tessed",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A more robust tap-producing, tape compatible, test harness for node and browsers. Namespacing, context passing, beforeEach, afterEach, etc ...",
   "main": "index.js",
   "repository": {
@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/scottcorgan/tessed",
   "dependencies": {
+    "figures": "^1.4.0",
     "is-promise": "^2.0.0",
     "merge": "^1.2.0",
     "tape": "^4.0.1"
