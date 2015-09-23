@@ -47,7 +47,8 @@ function namespace (name, setup) {
         fail: t.fail,
         notDeepEqual: t.notDeepEqual,
         notEqual: t.notEqual,
-        context: t.context
+        context: t.context,
+        plan: t.plan
       })
 
       // Promise
